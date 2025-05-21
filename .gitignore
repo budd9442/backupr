@@ -1,0 +1,46 @@
+# Node.js (frontend & backend)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Build output
+dist/
+build/
+out/
+coverage/
+.next/
+.nuxt/
+.svelte-kit/
+.sapper/
+public/build/
+
+# Environment files
+.env
+.env.*.local
+
+# Logs
+logs/
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+
+# Misc
+*.local
+*.cache
+*.tmp
+*.bak
+
+# Frontend specific
+# (add more as needed for your frontend framework)
+
+# Backend specific
+# (add more as needed for your backend framework)
