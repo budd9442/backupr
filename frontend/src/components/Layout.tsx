@@ -20,7 +20,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       <footer className={`py-4 text-center text-sm ${
         theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
       }`}>
-        © {new Date().getFullYear()} Budd Systems - Zoom Bot Manager
+        © {new Date().getFullYear()} budd.systems - Zoom Bot Manager
       </footer>
     </div>
   );

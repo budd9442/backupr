@@ -90,7 +90,7 @@ const BotControls: React.FC = () => {
             <span className={`ml-2 ${
               theme === 'dark' ? 'text-blue-400' : 'text-blue-600'
             } font-medium`}>
-              {bots.length} / 10
+              {bots.length} / 7
             </span>
           </div>
           

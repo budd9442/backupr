@@ -8,7 +8,7 @@ const router = express.Router();
 
 const API_KEY = process.env.ZOOM_API_KEY;
 let ZOOM_LINK = "";
-const BOT_LIMIT = 10;
+const BOT_LIMIT = 7;
 
 const USER_AGENTS = [
   "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/123.0.0.0 Safari/537.36",
@@ -61,15 +61,40 @@ router.post("/kill", async (req, res) => {
   const { name } = req.body;
   const bot = bots.get(name);
   if (!bot) return res.status(404).json({ error: "Bot not found" });
-  await bot.browser.close();
+  try {
+    // Close page and browser, then clean up references
+    if (bot.page && !bot.page.isClosed()) {
+      await bot.page.close();
+    }
+    if (bot.browser && bot.browser.isConnected()) {
+      await bot.browser.close();
+    }
+  } catch (err) {
+    console.error(`[ERROR] Error closing bot '${name}':`, err);
+  }
   bots.delete(name);
+  // Explicitly nullify references for GC
+  if (bot.page) bot.page = null;
+  if (bot.browser) bot.browser = null;
   res.json({ success: true });
 });
 
 // Kill all bots
 router.post("/kill-all", async (_req, res) => {
   for (const [name, bot] of bots.entries()) {
-    await bot.browser.close();
+    try {
+      if (bot.page && !bot.page.isClosed()) {
+        await bot.page.close();
+      }
+      if (bot.browser && bot.browser.isConnected()) {
+        await bot.browser.close();
+      }
+    } catch (err) {
+      console.error(`[ERROR] Error closing bot '${name}':`, err);
+    }
+    // Explicitly nullify references for GC
+    if (bot.page) bot.page = null;
+    if (bot.browser) bot.browser = null;
     bots.delete(name);
   }
   res.json({ success: true });
@@ -148,7 +173,10 @@ async function joinZoomBot(name) {
 
 // CORS: Safe for browser access from your domain only
 app.use(cors({
-  origin: "https://meek-chaja-a6900c.netlify.app",
+  origin: [
+    "http://budd.systems",
+    "http://budd.systems:5000"
+  ],
   methods: ["GET", "POST"],
   allowedHeaders: ["Content-Type", "Authorization"]
 }));

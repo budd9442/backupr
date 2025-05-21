@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useBots } from '../context/BotContext';
 import { useTheme } from '../context/ThemeContext';
 import { Video } from 'lucide-react';
@@ -8,24 +8,41 @@ const ZoomLinkForm: React.FC = () => {
   const { zoomLink, setLink, isLoading } = useBots();
   const { theme } = useTheme();
   const [link, setLinkInput] = useState(zoomLink);
+  const [showSuccess, setShowSuccess] = useState(false);
+
+  useEffect(() => {
+    setLinkInput(zoomLink);
+  }, [zoomLink]);
+
+  // Fetch the zoom link from backend at startup
+  useEffect(() => {
+    const fetchZoomLink = async () => {
+      try {
+        const res = await fetch('/get-link');
+        if (res.ok) {
+          const data = await res.json();
+          if (data?.link) {
+            setLinkInput(data.link);
+          }
+        }
+      } catch (err) {
+        // Optionally handle error
+      }
+    };
+    fetchZoomLink();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (link.trim()) {
       try {
         await setLink(link.trim());
+        setShowSuccess(true);
+        setTimeout(() => setShowSuccess(false), 3000);
       } catch (error) {
         // Error handling is done in context
       }
     }
-  };
-
-  const isValidZoomLink = (url: string) => {
-    return url.trim() !== '' && (
-      url.includes('zoom.us/j/') || 
-      url.includes('zoom.us/meeting/') ||
-      url.includes('zoom.us/s/')
-    );
   };
 
   return (
@@ -58,11 +75,11 @@ const ZoomLinkForm: React.FC = () => {
                 ? 'bg-gray-700 border-gray-600 text-white focus:ring-blue-500' 
                 : 'bg-white border-gray-300 text-gray-900 focus:ring-blue-400'
             }`}
-            placeholder="https://zoom.us/j/123456789"
+            placeholder="https://app.zoom.us/wc/XXXXXXX/join?XXX"
             required
           />
           
-          {zoomLink && (
+          {showSuccess && (
             <p className={`mt-2 text-sm ${
               theme === 'dark' ? 'text-green-400' : 'text-green-600'
             }`}>
@@ -72,8 +89,7 @@ const ZoomLinkForm: React.FC = () => {
         </div>
         
         <Button 
-          type="submit" 
-          disabled={!isValidZoomLink(link) || isLoading || link === zoomLink}
+          type="submit"
         >
           Set Meeting Link
         </Button>
